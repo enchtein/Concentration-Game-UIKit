@@ -39,12 +39,6 @@ class ViewController: UIViewController {
     }
   }
   
-  @IBAction func newGame(_ sender: UIButton) {
-    emojiChoises = (CardsTheme.allCases.randomElement() ?? .whether).emojiTheme
-    game = Concentration(numberOfPairsOfCards: (cardButtons.count + 1) / 2)
-    self.updateViewFromModel()
-  }
-  
   func updateViewFromModel() {
     for index in cardButtons.indices {
       let button = cardButtons[index]
