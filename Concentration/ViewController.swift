@@ -9,20 +9,30 @@ import UIKit
 
 class ViewController: UIViewController {
   
-  lazy var game = Concentration(numberOfPairsOfCards: (cardButtons.count + 1) / 2)
+  private lazy var game = Concentration(numberOfPairsOfCards: numberOfPairsOfCards)
   
-  var score = 0 {
-//    print(game.score)
-//    flipCountLabel.text = "Flips: \(game.score)"
-//    return 0
-//    return game.score
+  var numberOfPairsOfCards: Int {
+      (cardButtons.count + 1) / 2
+  }
+  private(set) var score = 0 {
     didSet {
-      flipCountLabel.text = "Flips: \(score)"
+      self.updateFlipCountLabel()
     }
   }
+  private func updateFlipCountLabel() {
+    let attributes: [NSAttributedString.Key : Any] = [
+      .strokeWidth : 5.0,
+      .strokeColor : #colorLiteral(red: 1, green: 0.5763723254, blue: 0, alpha: 1)
+    ]
+    let attributedString = NSAttributedString(string: "Flips: \(score)", attributes: attributes)
+    flipCountLabel.attributedText = attributedString
+  }
   
-  
-  @IBOutlet weak var flipCountLabel: UILabel!
+  @IBOutlet weak var flipCountLabel: UILabel! {
+    didSet {
+      self.updateFlipCountLabel()
+    }
+  }
   
   @IBOutlet var cardButtons: [UIButton]!
   
@@ -39,7 +49,7 @@ class ViewController: UIViewController {
     }
   }
   
-  func updateViewFromModel() {
+  private func updateViewFromModel() {
     for index in cardButtons.indices {
       let button = cardButtons[index]
       let card = game.cards[index]
@@ -53,19 +63,29 @@ class ViewController: UIViewController {
     }
   }
   
-//  var emojiChoises = ["🦇", "😱", "🙀", "😈", "🎃", "👻", "❄️", "☁️", "🍎"]
-  var emojiChoises = (CardsTheme.allCases.randomElement() ?? .whether).emojiTheme
+//  private var emojiChoises = (CardsTheme.allCases.randomElement() ?? .whether).emojiTheme
+  private var emojiChoises = "🦇😱🙀😈🎃👻❄️☁️🍎"
   
-  var emoji = [Int : String]()
+  private var emoji = [Card : String]()
   
-  func emoji(for card: Card) -> String {
-    if emoji[card.identifier] == nil, emojiChoises.count > 0 {
-      let randomIndex = Int(arc4random_uniform(UInt32(emojiChoises.count)))
-      emoji[card.identifier] = emojiChoises.remove(at: randomIndex)
+  private func emoji(for card: Card) -> String {
+    if emoji[card] == nil, emojiChoises.count > 0 {
+      let randomStringIndex = emojiChoises.index(emojiChoises.startIndex, offsetBy: emojiChoises.count.arc4random)
+//      emoji[card] = emojiChoises.remove(at: emojiChoises.count.arc4random)
+      emoji[card] = String(emojiChoises.remove(at: randomStringIndex))
     }
-    
-    
-    return emoji[card.identifier] ?? "?"
+    return emoji[card] ?? "?"
   }
 }
 
+extension Int {
+  var arc4random: Int {
+    if self > 0 {
+      return Int(arc4random_uniform(UInt32(self)))
+    } else if self < 0 {
+      return -Int(arc4random_uniform(UInt32(self)))
+    } else {
+      return 0
+    }
+  }
+}

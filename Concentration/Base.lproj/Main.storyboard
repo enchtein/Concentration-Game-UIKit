@@ -141,10 +141,11 @@
                             </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="6fB-jS-O2c" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="6BB-3d-B83"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="6fB-jS-O2c" secondAttribute="trailing" constant="20" id="VqZ-up-RTP"/>
+                            <constraint firstItem="Wqe-ie-9Qb" firstAttribute="top" relation="greaterThanOrEqual" secondItem="6fB-jS-O2c" secondAttribute="bottom" constant="8" symbolic="YES" id="ZBO-1R-ynb"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Wqe-ie-9Qb" secondAttribute="bottom" id="idk-my-9Gn"/>
                             <constraint firstItem="Wqe-ie-9Qb" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="oml-yx-G78"/>
                             <constraint firstItem="6fB-jS-O2c" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="piF-4n-RQS"/>
