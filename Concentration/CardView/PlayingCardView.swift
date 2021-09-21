@@ -29,11 +29,16 @@ class PlayingCardView: UIView {
     roundedRect.fill()
     
     if isFaceUp {
-      self.smileLabel.text = "test"
-      self.smileLabel.isHidden = !isFaceUp
+//      self.smileLabel.text = "test"
+      self.smileLabel.isHidden = false
     } else {
+      self.smileLabel.isHidden = true
       UIColor.white.setFill()
     }
+  }
+  
+  public func setLabelTitle(with text: String) {
+    self.smileLabel.text = text
   }
   
   private func createCornerLabel() -> UILabel {

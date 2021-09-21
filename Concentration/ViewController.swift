@@ -16,53 +16,39 @@ class ViewController: UIViewController {
     }
   }
   
-  //  private lazy var game = Concentration(numberOfPairsOfCards: numberOfPairsOfCards)
-  private lazy var game = Concentration(numberOfTrioOfCards: numberOfTrioOfCards)
-  private var visibleCardsCount = 12
+//  private lazy var game = Concentration(numberOfPairsOfCards: numberOfPairsOfCards)
+    private lazy var game = Concentration(numberOfTrioOfCards: numberOfTrioOfCards)
+  private var visibleCardsCount = 12 {
+    didSet {
+      let subViews = self.view.subviews.filter({$0 is PlayingCardView})
+        subViews.forEach({$0.removeFromSuperview()})
+      
+      setupCardOnScreen()
+    }
+  }
   private var numberOfPairsOfCards: Int {
-    (cardButtons.count + 1) / 2
+    //    (cardButtons.count + 1) / 2
+    (49 + 1) / 2
   }
   private var numberOfTrioOfCards: Int {
-    (cardButtons.count + 1) / 3
+//    (cardButtons.count + 1) / 3
+    (49 + 1) / 3
   }
   private(set) var score = 0 {
     didSet {
       self.updateFlipCountLabel()
     }
   }
-  //  private var emojiChoises = (CardsTheme.allCases.randomElement() ?? .whether).emojiTheme
   private var emojiChoises = "🦇😱🙀😈🎃👻❄️☁️🍎"
   private var emoji = [Card : String]()
   
-  lazy var testPlayingCardView = PlayingCardView()
-  //  {
-  //    didSet {
-  //      let tapGesture = UITapGestureRecognizer(target: self, action: #selector(playingCardViewTapped))
-  //      testPlayingCardView.addGestureRecognizer(tapGesture)
-  //    }
-  //  }
-  @objc func playingCardViewTapped() {
-    self.testPlayingCardView.isFaceUp.toggle()
-  }
+//  lazy var testPlayingCardView = PlayingCardView()
   
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    //    updateViewFromModel()
-    //    let test = PlayingCardView()
-    self.view.addSubview(testPlayingCardView)
-    testPlayingCardView.translatesAutoresizingMaskIntoConstraints = false
-    testPlayingCardView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
-    testPlayingCardView.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
-    testPlayingCardView.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
-    testPlayingCardView.bottomAnchor.constraint(equalTo: self.flipCountLabel.topAnchor).isActive = true
-    
-    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(playingCardViewTapped))
-    testPlayingCardView.addGestureRecognizer(tapGesture)
-    
-    
-    
-    
+    gameCardsEmoji.shuffle()
+    settingCardDictionary()
   }
   
   override func viewDidLayoutSubviews() {
@@ -71,18 +57,94 @@ class ViewController: UIViewController {
     if self.gameCards == nil {
       setupCardOnScreen()
     }
-    
   }
   
-  var gameCards: [PlayingCardView]?
-  //  var cards:
+  @objc func playingCardViewTapped(_ gesture: UITapGestureRecognizer) {
+    let tappedViewIndex = gesture.view?.tag ?? 0
+    print(tappedViewIndex)
+    
+//    self.game.chooseCard(at: tappedViewIndex) { isMatched in
+////      print("find pair")
+//    }
+    self.game.runChoosingCard(at: tappedViewIndex) { isMatched in
+      print("find trio")
+    }
+    
+    self.updateModelToUI()
+  }
+  
+  var gameCards: [PlayingCardView]? {
+    didSet {
+      self.emojiForCards.forEach { card, emoji in
+        if !self.game.cards.contains(card) {
+          self.emojiForCards.removeValue(forKey: card)
+        }
+      }
+    }
+  }
+  
+  var emojiForCards = [Card : String]()
+  var gameCardsEmoji = ["🌈", "🌪", "☀️", "🌤", "⛅️", "🌧", "🌩", "❄️", "💨", "🌊", "🌫", "☔️", "🐪", "🦒", "🦘", "🦬", "🐃", "🐖", "🦏", "🦃", "🦤", "🦫", "🦝", "🦨", "🚗", "🚕", "🚙", "🚌", "🚎", "🏎", "🚓", "🚑", "🚒", "🚐", "🛻", "🚚", "😀", "😆", "🥲", "😉", "🤪", "😎", "🤑", "😴", "🥱", "😮", "😱", "🤠", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "🍏", "🍎", "🍐", "🍊", "🍋", "🍌", "🍉", "🍇", "🍓", "🫐", "🍈", "🍒"]
+  
+  
+  
+  // MARK: - Update UI
+  private func updateFlipCountLabel() {
+    let attributes: [NSAttributedString.Key : Any] = [
+      .strokeWidth : 5.0,
+      .strokeColor : #colorLiteral(red: 1, green: 0.5763723254, blue: 0, alpha: 1)
+    ]
+    let attributedString = NSAttributedString(string: "Flips: \(score)", attributes: attributes)
+    flipCountLabel.attributedText = attributedString
+  }
+  private func updateModelToUI() {
+    score = game.score
+    let subViews = self.view.subviews.filter({$0 is PlayingCardView})
+    
+    if let _ = self.game.removingIndexes {
+      subViews.forEach({$0.removeFromSuperview()})
+      
+      setupCardOnScreen()
+      self.game.removingIndexes = nil
+      return
+    }
+    
+    for playingCardView in subViews.indices {
+      let playingCardView = subViews[playingCardView]
+      let index = subViews.firstIndex(of: playingCardView) ?? 0
+      
+      let card = game.cards[index]
+      
+      if let playingCardView = playingCardView as? PlayingCardView {
+        playingCardView.isFaceUp = card.isFaceUp
+      }
+    }
+  }
   private func setupCardOnScreen() {
     var startPlayingCardViewsArray = [PlayingCardView]()
+    let cardsCount = self.game.cards.count < self.visibleCardsCount ? self.game.cards.count : self.visibleCardsCount
     
-    let cardsCount = self.gameCards == nil ? self.game.cards.count : self.gameCards?.count ?? 0
+    guard cardsCount > 0 else {
+      let alert = UIAlertController(title: "End of Game", message: "You are win", preferredStyle: .alert)
+      let okButton = UIAlertAction(title: "Ok", style: .default, handler: nil)
+      alert.addAction(okButton)
+      self.present(alert, animated: true, completion: nil)
+      return
+    }
     
-    for _ in 0..<cardsCount {
+    for index in 0..<cardsCount {
       let tempPlayingCardView = PlayingCardView()
+      let tapGesture = UITapGestureRecognizer(target: self, action: #selector(playingCardViewTapped(_:)))
+      tempPlayingCardView.addGestureRecognizer(tapGesture)
+      
+      tempPlayingCardView.tag = index
+      
+      // Set emoji title >>>
+      let card = game.cards[index]
+      let smile = self.emojiForCards[card] ?? "?"
+      tempPlayingCardView.setLabelTitle(with: smile)
+      tempPlayingCardView.isFaceUp = card.isFaceUp
+      // <<< Set emoji title
       
       if startPlayingCardViewsArray.isEmpty {
         startPlayingCardViewsArray = [tempPlayingCardView]
@@ -147,61 +209,14 @@ class ViewController: UIViewController {
     }
   }
   
-  // MARK: - Update UI
-  private func updateFlipCountLabel() {
-    let attributes: [NSAttributedString.Key : Any] = [
-      .strokeWidth : 5.0,
-      .strokeColor : #colorLiteral(red: 1, green: 0.5763723254, blue: 0, alpha: 1)
-    ]
-    let attributedString = NSAttributedString(string: "Flips: \(score)", attributes: attributes)
-    flipCountLabel.attributedText = attributedString
-  }
-  
-  private func updateViewFromModel() {
-    for index in cardButtons.indices {
-      let button = cardButtons[index]
-      button.isUserInteractionEnabled = !(index >= visibleCardsCount)
-      let card = game.cards[index]
-      if card.isFaceUp {
-        button.setTitle(emoji(for: card), for: .normal)
-        button.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
-      } else {
-        button.setTitle("", for: .normal)
-        button.backgroundColor = card.isMatched || index >= visibleCardsCount ? #colorLiteral(red: 0.9254902005, green: 0.4194166106, blue: 0.1966157824, alpha: 0) : UIColor.orange
-      }
-      
-      self.provideBorderAnimate(for: button, at: card)
-    }
-  }
-  
   // MARK: - Actions
-  @IBAction func touchCard(_ sender: UIButton) {
-    //    flipCount += 1
-    
-    if let cardNumber = cardButtons.firstIndex(of: sender) {
-      //      game.chooseCard(at: cardNumber)
-      game.runChoosingCard(at: cardNumber) { isMatched in
-        if isMatched {
-          self.add3MoreCardsIfNeed()
-        }
-      }
-      score = game.score
-      
-      updateViewFromModel()
-    } else {
-      print("chosen card was nor in cardButtons")
-    }
-  }
-  
   @IBAction func deal3MoreCards(_ sender: UIButton) {
     self.add3MoreCardsIfNeed()
-    self.updateViewFromModel()
   }
   
   // MARK: - Methods
   private func add3MoreCardsIfNeed() {
-    let invisibleCardsCount = self.cardButtons.count - self.visibleCardsCount
-    
+    let invisibleCardsCount = self.game.cards.count - self.visibleCardsCount
     if invisibleCardsCount > 3 {
       self.visibleCardsCount += 3
       print("3 cards to add (first condition)")
@@ -211,17 +226,23 @@ class ViewController: UIViewController {
     } else {
       print("nothing to add (third condition)")
       self.deal3MoreCardsButton.isUserInteractionEnabled = false
+      let alert = UIAlertController(title: "nothing to add", message: "no more cards in queue", preferredStyle: .alert)
+      let okButton = UIAlertAction(title: "Ok", style: .default, handler: nil)
+      alert.addAction(okButton)
+      self.present(alert, animated: true, completion: nil)
+    }
+  }
+  private func settingCardDictionary() {
+    let unique = Array(Set(self.game.cards))
+    for card in unique {
+      if emojiForCards[card] == nil {
+        let cardIndex = unique.firstIndex(of: card) ?? 0
+        
+        emojiForCards[card] = String(gameCardsEmoji[cardIndex])
+      }
     }
   }
   
-  private func emoji(for card: Card) -> String {
-    if emoji[card] == nil, emojiChoises.count > 0 {
-      let randomStringIndex = emojiChoises.index(emojiChoises.startIndex, offsetBy: emojiChoises.count.arc4random)
-      //      emoji[card] = emojiChoises.remove(at: emojiChoises.count.arc4random)
-      emoji[card] = String(emojiChoises.remove(at: randomStringIndex))
-    }
-    return emoji[card] ?? "?"
-  }
 }
 
 // MARK: - Extensions

@@ -33,6 +33,19 @@ struct Concentration {
     }
   }
   
+  var removingIndexes: [Int]?
+  mutating func removeCard(at index: Int) {
+    
+    self.cards.remove(at: index)
+    
+//    removingIndexes?.append(index)
+    if removingIndexes == nil {
+      removingIndexes = [index]
+    } else {
+      removingIndexes?.append(index)
+    }
+  }
+  
   //MARK: - choosing cards methods
   mutating func runChoosingCard(at index: Int, setMatch: (Bool) -> Void) {
     switch self.cardMatchedCount {
@@ -50,13 +63,24 @@ struct Concentration {
         if cards[matchIndex] == cards[index] {
           cards[matchIndex].isMatched = true
           cards[index].isMatched = true
+          
+//          removeCard(at: matchIndex)
+//          removeCard(at: index)
+//          let ss = cards.first(where: {$0.isMatched})
+          self.removingIndexes = [matchIndex, index]
+          
+          cards.removeAll(where: {$0.isMatched})
+          
           setMatch(true)
           score += 2
+        } else if index < self.cards.count {
+          cards[index].isFaceUp = true
         }
-        cards[index].isFaceUp = true
+//        cards[index].isFaceUp = true
       } else if cards[index].isFaceUp { // deselecting card
         cards[index].isFaceUp.toggle()
       } else {
+//        cards[index].isFaceUp = true
         indexOfOneAndOnlyFaceUpCard = index
         
         score -= 1
@@ -76,12 +100,19 @@ struct Concentration {
             self.cards[matchIndexCard].isMatched = true
           }
           cards[index].isMatched = true
+          
+          self.removingIndexes = matchIndexes
+          self.removingIndexes?.append(index)
+          cards.removeAll(where: {$0.isMatched})
+          
           setMatch(true)
           score += 3
+        } else if index < self.cards.count {
+          cards[index].isFaceUp = true
         }
-        cards[index].isFaceUp = true
+//        cards[index].isFaceUp = true
       } else if cards[index].isFaceUp {
-        cards[index].isFaceUp.toggle()
+        cards[index].isFaceUp = false
       } else {
         if let _ = self.indexOfTwoAndOnlyFaceUpCard {
           indexOfTwoAndOnlyFaceUpCard?.append(index)
