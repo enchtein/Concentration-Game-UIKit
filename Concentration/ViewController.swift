@@ -34,10 +34,117 @@ class ViewController: UIViewController {
   private var emojiChoises = "🦇😱🙀😈🎃👻❄️☁️🍎"
   private var emoji = [Card : String]()
   
+  lazy var testPlayingCardView = PlayingCardView()
+  //  {
+  //    didSet {
+  //      let tapGesture = UITapGestureRecognizer(target: self, action: #selector(playingCardViewTapped))
+  //      testPlayingCardView.addGestureRecognizer(tapGesture)
+  //    }
+  //  }
+  @objc func playingCardViewTapped() {
+    self.testPlayingCardView.isFaceUp.toggle()
+  }
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    updateViewFromModel()
+    //    updateViewFromModel()
+    //    let test = PlayingCardView()
+    self.view.addSubview(testPlayingCardView)
+    testPlayingCardView.translatesAutoresizingMaskIntoConstraints = false
+    testPlayingCardView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
+    testPlayingCardView.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
+    testPlayingCardView.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
+    testPlayingCardView.bottomAnchor.constraint(equalTo: self.flipCountLabel.topAnchor).isActive = true
+    
+    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(playingCardViewTapped))
+    testPlayingCardView.addGestureRecognizer(tapGesture)
+    
+    
+    
+    
+  }
+  
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    
+    if self.gameCards == nil {
+      setupCardOnScreen()
+    }
+    
+  }
+  
+  var gameCards: [PlayingCardView]?
+  //  var cards:
+  private func setupCardOnScreen() {
+    var startPlayingCardViewsArray = [PlayingCardView]()
+    
+    let cardsCount = self.gameCards == nil ? self.game.cards.count : self.gameCards?.count ?? 0
+    
+    for _ in 0..<cardsCount {
+      let tempPlayingCardView = PlayingCardView()
+      
+      if startPlayingCardViewsArray.isEmpty {
+        startPlayingCardViewsArray = [tempPlayingCardView]
+      } else {
+        startPlayingCardViewsArray.append(tempPlayingCardView)
+      }
+    }
+    
+    if self.gameCards == nil {
+      self.gameCards = startPlayingCardViewsArray
+    } else {
+      self.gameCards = startPlayingCardViewsArray
+    }
+    
+    var cardsTuple = (cardsInLine: 0, countOfLines: 0)
+    let sqrtFromCardsCount = sqrt(Double(cardsCount))
+    if sqrtFromCardsCount.truncatingRemainder(dividingBy: 1) == 0 {
+      
+      cardsTuple = (cardsInLine: Int(sqrtFromCardsCount), countOfLines: Int(sqrtFromCardsCount))
+    } else {
+      cardsTuple = (cardsInLine: Int(sqrtFromCardsCount)+1, countOfLines: Int(sqrtFromCardsCount)+1)
+    }
+    
+    let cardAspectRatio = self.view.frame.width / (self.flipCountLabel.frame.origin.y-50)
+    let cardWidth = self.view.frame.size.width / CGFloat(cardsTuple.cardsInLine)
+    let cardHeight = cardWidth / CGFloat(cardAspectRatio)
+    
+    // Set Anchors for Views
+    guard let gameCards = gameCards else { return }
+    
+    for cardView in gameCards {
+      if cardView == gameCards.first {
+        
+        self.view.addSubview(cardView)
+        
+        cardView.translatesAutoresizingMaskIntoConstraints = false
+        cardView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
+        cardView.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
+        cardView.widthAnchor.constraint(equalToConstant: cardWidth).isActive = true
+        cardView.heightAnchor.constraint(equalToConstant: cardHeight).isActive = true
+      } else {
+        if let currentIndex = gameCards.firstIndex(of: cardView) {
+          let previousPlayingCardView = gameCards[currentIndex-1]
+          
+          self.view.addSubview(cardView)
+          
+          let currentLine = currentIndex / cardsTuple.cardsInLine
+          let distance = currentLine-1 < 0 ? 0 : currentLine-1
+          
+          let rowAnchorPlayingCardView = gameCards[distance * cardsTuple.cardsInLine]
+          
+          let topAnchor = currentIndex < cardsTuple.cardsInLine ? self.view.safeAreaLayoutGuide.topAnchor : rowAnchorPlayingCardView.bottomAnchor
+          let leftAnchor = currentIndex % cardsTuple.cardsInLine == 0 ? self.view.leftAnchor : previousPlayingCardView.rightAnchor
+          
+          cardView.translatesAutoresizingMaskIntoConstraints = false
+          cardView.topAnchor.constraint(equalTo: topAnchor).isActive = true
+          cardView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+          cardView.widthAnchor.constraint(equalToConstant: cardWidth).isActive = true
+          cardView.heightAnchor.constraint(equalToConstant: cardHeight).isActive = true
+        }
+      }
+    }
   }
   
   // MARK: - Update UI

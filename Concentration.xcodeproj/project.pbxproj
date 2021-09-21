@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6D46D5C026F90B5200D6EC2F /* PlayingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D46D5BF26F90B5200D6EC2F /* PlayingCardView.swift */; };
 		6D49313526CAED6000CA6036 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D49313426CAED6000CA6036 /* AppDelegate.swift */; };
 		6D49313726CAED6000CA6036 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D49313626CAED6000CA6036 /* SceneDelegate.swift */; };
 		6D49313926CAED6000CA6036 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D49313826CAED6000CA6036 /* ViewController.swift */; };
@@ -18,6 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6D46D5BF26F90B5200D6EC2F /* PlayingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayingCardView.swift; sourceTree = "<group>"; };
 		6D49313126CAED6000CA6036 /* Concentration.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Concentration.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6D49313426CAED6000CA6036 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6D49313626CAED6000CA6036 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -41,6 +43,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6D46D5BE26F90B0800D6EC2F /* CardView */ = {
+			isa = PBXGroup;
+			children = (
+				6D46D5BF26F90B5200D6EC2F /* PlayingCardView.swift */,
+			);
+			path = CardView;
+			sourceTree = "<group>";
+		};
 		6D49312826CAED6000CA6036 = {
 			isa = PBXGroup;
 			children = (
@@ -60,6 +70,7 @@
 		6D49313326CAED6000CA6036 /* Concentration */ = {
 			isa = PBXGroup;
 			children = (
+				6D46D5BE26F90B0800D6EC2F /* CardView */,
 				6D49313826CAED6000CA6036 /* ViewController.swift */,
 				6D49313A26CAED6000CA6036 /* Main.storyboard */,
 				6D49314926CAEFA400CA6036 /* Supporting Files */,
@@ -152,6 +163,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6D49313926CAED6000CA6036 /* ViewController.swift in Sources */,
+				6D46D5C026F90B5200D6EC2F /* PlayingCardView.swift in Sources */,
 				6D49314B26CB020100CA6036 /* Concentration.swift in Sources */,
 				6D49314D26CB02B900CA6036 /* Card.swift in Sources */,
 				6D49313526CAED6000CA6036 /* AppDelegate.swift in Sources */,
