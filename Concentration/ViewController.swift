@@ -69,11 +69,18 @@ class ViewController: UIViewController {
     }
   }
   
+  override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+    super.viewWillTransition(to: size, with: coordinator)
+    
+    if size.width != self.view.frame.size.width {
+      let subViews = self.view.subviews.filter({$0 is PlayingCardView})
+      subViews.forEach({$0.removeFromSuperview()})
+      self.gameCards = nil
+    }
+  }
+  
   private var faceUpCardViews: [PlayingCardView]? {
     return gameCards?.filter {$0.isFaceUp && !$0.isHidden}
-  }
-  private var faceUpCardViewsMatch : Bool {
-    return self.game.cards.contains(where: {$0.isMatched})
   }
   
   @objc func playingCardViewTapped(_ gesture: UITapGestureRecognizer) {
