@@ -72,6 +72,9 @@ class ViewController: UIViewController {
   private var faceUpCardViews: [PlayingCardView]? {
     return gameCards?.filter {$0.isFaceUp && !$0.isHidden}
   }
+  private var faceUpCardViewsMatch : Bool {
+    return self.game.cards.contains(where: {$0.isMatched})
+  }
   
   @objc func playingCardViewTapped(_ gesture: UITapGestureRecognizer) {
     if let chosenCardView = gesture.view as? PlayingCardView {
@@ -82,7 +85,11 @@ class ViewController: UIViewController {
       
       UIView.transition(with: chosenCardView, duration: 0.6, options: [.transitionFlipFromLeft]) {
         chosenCardView.isFaceUp = !chosenCardView.isFaceUp
+        if self.faceUpCardViews?.count == 3 {
+          self.view.isUserInteractionEnabled = false
+        }
       } completion: { isSuccess in
+        self.view.isUserInteractionEnabled = true
         self.updateModelToUI()
       }
     }
