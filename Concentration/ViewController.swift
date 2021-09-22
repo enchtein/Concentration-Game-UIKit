@@ -70,13 +70,18 @@ class ViewController: UIViewController {
   }
   
   @objc func playingCardViewTapped(_ gesture: UITapGestureRecognizer) {
-    let tappedViewIndex = gesture.view?.tag ?? 0
-    print(tappedViewIndex)
-    
-    self.game.runChoosingCard(at: tappedViewIndex) { isMatched in
-      print("find trio")
+    if let chosenCardView = gesture.view as? PlayingCardView {
+      print("Chosen Card View Index is \(chosenCardView.tag)")
+      UIView.transition(with: chosenCardView,
+                        duration: 0.6,
+                        options: [.transitionFlipFromLeft]) {
+        chosenCardView.isFaceUp = !chosenCardView.isFaceUp
+      }
+      
+      self.game.runChoosingCard(at: chosenCardView.tag) { isMatched in
+        print("find trio")
+      }
     }
-    
       self.updateModelToUI()
   }
   
