@@ -16,10 +16,22 @@ class ViewController: UIViewController {
     }
   }
   
+  var additionalViews: [PlayingCardView]?
 //  private lazy var game = Concentration(numberOfPairsOfCards: numberOfPairsOfCards)
     private lazy var game = Concentration(numberOfTrioOfCards: numberOfTrioOfCards)
   private var visibleCardsCount = 12 {
     didSet {
+      let difference = visibleCardsCount - oldValue
+      for _ in 0..<difference {
+        let temp = PlayingCardView()
+        if additionalViews?.isEmpty ?? true {
+          additionalViews = [temp]
+        } else {
+          additionalViews?.append(temp)
+        }
+      }
+      
+      isAllowTransitionAnimation = false
       let subViews = self.view.subviews.filter({$0 is PlayingCardView})
         subViews.forEach({$0.removeFromSuperview()})
       
@@ -32,7 +44,7 @@ class ViewController: UIViewController {
   }
   private var numberOfTrioOfCards: Int {
 //    (cardButtons.count + 1) / 3
-    (49 + 1) / 3
+    (18 + 1) / 3
   }
   private(set) var score = 0 {
     didSet {
@@ -41,8 +53,6 @@ class ViewController: UIViewController {
   }
   private var emojiChoises = "🦇😱🙀😈🎃👻❄️☁️🍎"
   private var emoji = [Card : String]()
-  
-//  lazy var testPlayingCardView = PlayingCardView()
   
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -63,14 +73,11 @@ class ViewController: UIViewController {
     let tappedViewIndex = gesture.view?.tag ?? 0
     print(tappedViewIndex)
     
-//    self.game.chooseCard(at: tappedViewIndex) { isMatched in
-////      print("find pair")
-//    }
     self.game.runChoosingCard(at: tappedViewIndex) { isMatched in
       print("find trio")
     }
     
-    self.updateModelToUI()
+      self.updateModelToUI()
   }
   
   var gameCards: [PlayingCardView]? {
@@ -103,7 +110,6 @@ class ViewController: UIViewController {
     
     if let _ = self.game.removingIndexes {
       subViews.forEach({$0.removeFromSuperview()})
-      
       setupCardOnScreen()
       self.game.removingIndexes = nil
       return
@@ -120,6 +126,7 @@ class ViewController: UIViewController {
       }
     }
   }
+  
   private func setupCardOnScreen() {
     var startPlayingCardViewsArray = [PlayingCardView]()
     let cardsCount = self.game.cards.count < self.visibleCardsCount ? self.game.cards.count : self.visibleCardsCount
@@ -178,7 +185,9 @@ class ViewController: UIViewController {
     for cardView in gameCards {
       if cardView == gameCards.first {
         
-        self.view.addSubview(cardView)
+        UIView.transition(with: self.view, duration: 0.5, options: [.transitionCrossDissolve], animations: {
+          self.view.addSubview(cardView)
+        }, completion: nil)
         
         cardView.translatesAutoresizingMaskIntoConstraints = false
         cardView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
@@ -189,7 +198,16 @@ class ViewController: UIViewController {
         if let currentIndex = gameCards.firstIndex(of: cardView) {
           let previousPlayingCardView = gameCards[currentIndex-1]
           
-          self.view.addSubview(cardView)
+          let options: UIView.AnimationOptions = isAllowTransitionAnimation ? [.transitionCrossDissolve] : []
+          UIView.transition(with: self.view, duration: 0.5, options: options) {
+            self.view.addSubview(cardView)
+          } completion: { isAdded in
+            if isAdded {
+              if let _ = self.additionalViews {
+                self.setAditionalViews(cardWidth: cardWidth, cardHeight: cardHeight)
+              }
+            }
+          }
           
           let currentLine = currentIndex / cardsTuple.cardsInLine
           let distance = currentLine-1 < 0 ? 0 : currentLine-1
@@ -207,6 +225,36 @@ class ViewController: UIViewController {
         }
       }
     }
+    
+  }
+  
+  var isAllowTransitionAnimation: Bool = true
+  private func setAditionalViews(cardWidth: CGFloat, cardHeight: CGFloat) {
+    self.additionalViews?.forEach({self.view.addSubview($0)})
+    
+    guard let range = additionalViews?.count, let gameCards = gameCards else { return }
+    let lastViews = gameCards[gameCards.endIndex-range..<gameCards.endIndex]
+    for view in lastViews {
+      view.isHidden = true
+    }
+    
+    
+    for additionalView in additionalViews! {
+      guard let currentIndex = additionalViews?.firstIndex(of: additionalView) else { return }
+      let index = lastViews.endIndex - (lastViews.count - currentIndex)
+      UIView.animate(withDuration: 0.75) {
+        additionalView.frame.origin = gameCards[index].frame.origin
+        additionalView.frame.size = gameCards[index].frame.size
+        self.view.layoutIfNeeded()
+        
+        print(additionalView.frame)
+      } completion: { success in
+        print(success)
+        gameCards[index].isHidden = false
+        additionalView.removeFromSuperview()
+      }
+    }
+    additionalViews = nil
   }
   
   // MARK: - Actions
