@@ -69,20 +69,23 @@ class ViewController: UIViewController {
     }
   }
   
+  private var faceUpCardViews: [PlayingCardView]? {
+    return gameCards?.filter {$0.isFaceUp && !$0.isHidden}
+  }
+  
   @objc func playingCardViewTapped(_ gesture: UITapGestureRecognizer) {
     if let chosenCardView = gesture.view as? PlayingCardView {
       print("Chosen Card View Index is \(chosenCardView.tag)")
-      UIView.transition(with: chosenCardView,
-                        duration: 0.6,
-                        options: [.transitionFlipFromLeft]) {
-        chosenCardView.isFaceUp = !chosenCardView.isFaceUp
-      }
-      
       self.game.runChoosingCard(at: chosenCardView.tag) { isMatched in
         print("find trio")
       }
+      
+      UIView.transition(with: chosenCardView, duration: 0.6, options: [.transitionFlipFromLeft]) {
+        chosenCardView.isFaceUp = !chosenCardView.isFaceUp
+      } completion: { isSuccess in
+        self.updateModelToUI()
+      }
     }
-      self.updateModelToUI()
   }
   
   var gameCards: [PlayingCardView]? {
@@ -120,14 +123,12 @@ class ViewController: UIViewController {
       return
     }
     
-    for playingCardView in subViews.indices {
-      let playingCardView = subViews[playingCardView]
-      let index = subViews.firstIndex(of: playingCardView) ?? 0
-      
-      let card = game.cards[index]
-      
-      if let playingCardView = playingCardView as? PlayingCardView {
-        playingCardView.isFaceUp = card.isFaceUp
+    if let faceUpCardViews = faceUpCardViews, faceUpCardViews.count == 3 {
+      faceUpCardViews.forEach { cardView in
+        UIView.transition(with: cardView,
+                          duration: 0.6, options: [.transitionFlipFromRight]) {
+          cardView.isFaceUp = false
+        }
       }
     }
   }
